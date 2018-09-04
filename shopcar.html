@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/shopcar.css"/>
+	</head>
+	<body>
+		<header>
+			<div class="message" onclick="history.back()"><img src="images/list/pic_list_back.jpg"/></div>
+			<div class="search">
+				购物车
+			</div>
+			<div class="sys"><img src="images/list/pic_list_list.jpg"/></div>
+		</header>
+		<div id="box">
+			
+		
+		<div class="preLogin">
+			<a href="denglu.html">登录</a>
+			后可以查看历史收藏，还能使用优惠券噢~
+		</div>
+	
+		<div v-if="isShow">购物车空空如也，还不去买点什么！！！</div>
+		<main style="margin-bottom: 100px;" v-else>
+			<div v-for="item in ary">
+				<h2>孝感{{item.category}}自营店</h2>
+				<div class="shop_content">
+					<div>
+						<input type="checkbox" v-model="item.selected" />
+						<div class="shop_photo">
+							<img :src="item.img"/>
+						</div>
+						<div class="shop_info">
+							<h3>{{item.title}}</h3>
+							<div>
+								<div class="count">
+									<button @click="jian(item)">-</button>
+									<input type="number" v-model="item.num" min="1" />
+									<button @click="jia(item)">+</button>
+								</div>
+								<div class="shop_price">
+									<em>￥{{item.price}}.00</em>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+		
+		<footer>
+			<input type="checkbox" v-model="selectAll" v-on:change="select()" />
+			<div>
+				<p>应付金额：<em>￥{{abc}}</em></p>
+				<span>已优惠:￥0.00</span>
+			</div>
+			<button @click="jumpLogin()">去结算({{tap}})</button>
+		</footer>
+	</div>
+	<script src="js/public.js" type="text/javascript" charset="utf-8"></script>
+	<script src="vue/dist/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		var app = new Vue({
+			el:"#box",
+			data:{
+				ary:JSON.parse(localStorage.getItem("shopCar")) || [],
+				isShow:true,
+				selectAll:true
+				
+			},
+			computed:{
+				
+				abc(){
+					
+					var total = 0;
+					for(var i=0;i<this.ary.length;i++){
+						if(this.ary[i].selected){
+							total += this.ary[i].price*this.ary[i].num
+						}
+					}
+					return total;
+				},
+				tap(){
+					var total = 0;
+					for(var i=0;i<this.ary.length;i++){
+						total += this.ary[i].selected;
+					}
+					return total;
+				}
+			},
+			created(){
+				if(this.ary.length != 0){
+					this.isShow = false
+				}
+			},
+			methods:{
+				jia(item){
+					item.num++;
+					localStorage.setItem("shopCar",JSON.stringify(this.ary))
+				},
+				jian(item){
+					if(item.num<=1){
+						
+						if(confirm("确定要删除这件商品吗？")){
+							this.ary = this.ary.filter(function(data){
+								return data.id != item.id
+							})
+							localStorage.setItem("shopCar",JSON.stringify(this.ary))
+						}
+					  
+					}else{
+						item.num--
+					}
+					
+				},
+				select(){
+					for(var i=0;i<this.ary.length;i++){
+						if(this.selectAll){
+							this.ary[i].selected = true
+						}else{
+							this.ary[i].selected = false
+						}
+					}
+				},
+				jumpLogin(){
+					
+					sessionStorage.setItem("total",this.abc)
+					localStorage.setItem("loginJump","pay.html")
+					if(sessionStorage.getItem("phone")){
+						location = "pay.html"
+					}else{
+						location = "denglu.html"
+					}
+				}
+			}
+		})
+	</script>
+	</body>
+</html>
